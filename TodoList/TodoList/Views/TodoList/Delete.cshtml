@@ -4,12 +4,13 @@
     ViewData["Title"] = "Delete";
 }
 
-<h1>Delete</h1>
+<h1>Usuń Zadanie</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Jestes pewny że chcesz usunac to zadanie ? </h3>
+<div class="container">
+    @await Component.InvokeAsync("Notification")
+</div>
 <div>
-    <h4>WorkTask</h4>
-    <hr />
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Title)
@@ -44,7 +45,7 @@
     </dl>
     
     <form asp-action="Delete">
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Usuń" class="btn btn-danger" /> |
+        <a asp-action="Index">Wróć do Strony Głownej</a>
     </form>
 </div>

@@ -30,6 +30,15 @@ namespace TodoList.Controllers
                 .ToListAsync();
             return View("Index", workTasks);
         }
+        public async Task<PartialViewResult> GetNotifications()
+        {
+            var today = DateTime.Today;
+            var tasksForToday = await _dbContext.WorkTasks
+                .Where(wt => wt.ExpectedEndDate.Date == today)
+                .ToListAsync();
+
+            return PartialView("_NotificationPartial", tasksForToday);
+        }
         public ActionResult Create()
         {
             return View();
@@ -52,14 +61,12 @@ namespace TodoList.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: TodoListController/Edit/5
         public async Task<ActionResult> Edit(int id)
         {
             var workTask = await _dbContext.WorkTasks.FirstOrDefaultAsync(wt => wt.Id == id);
             return View(workTask);
         }
 
-        // POST: TodoListController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit (WorkTask workTask)
@@ -71,17 +78,19 @@ namespace TodoList.Controllers
                 await _dbContext.SaveChangesAsync();
 
             }
+            else
+            {
+                return RedirectToAction("Index");
+            }
             return RedirectToAction("Index");
         }
 
-        // GET: TodoListController/Delete/5
         public async Task<ActionResult> Delete(int id)
         {
             var workTask = await _dbContext.WorkTasks.FirstOrDefaultAsync(wt => wt.Id == id);
             return View(workTask);
         }
 
-        // POST: TodoListController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(WorkTask workTask)

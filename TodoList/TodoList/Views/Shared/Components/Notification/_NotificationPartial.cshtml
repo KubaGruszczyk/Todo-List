@@ -1,0 +1,20 @@
+﻿@model IEnumerable<TodoList.Entities.WorkTask>
+
+<div class="notification-container">
+    @if (Model.Any())
+    {
+        <div class="notification-title"><i class="fas fa-bell"></i> Powiadomienia o zadaniach na dzisiaj:</div>
+        <ul>
+            @foreach (var task in Model)
+            {
+                <li class="notification-item">
+                    <i class="fas fa-tasks"></i> @task.Title (do zrobienia do @task.ExpectedEndDate.ToShortDateString())
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>Brak zadań do wykonania na dzisiaj.</p>
+    }
+</div>

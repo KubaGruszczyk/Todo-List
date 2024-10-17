@@ -9,7 +9,9 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-
+<div class="container">
+    @await Component.InvokeAsync("Notification")
+</div>
 <form asp-action="FindWorkTasksByDate" method="get">
     <label for="date">Wybierz datę:</label>
     <input type="date" id="date" name="date" />
@@ -21,9 +23,6 @@
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ExpectedEndDate)
@@ -45,21 +44,18 @@
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @item.ExpectedEndDate.ToShortDateString() <!-- Użycie metody bezpośrednio -->
+                    @item.ExpectedEndDate.ToShortDateString()
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.IsCompleted)
                 </td>
                 <td>
-                    @item.CreatedAt.ToShortDateString() <!-- Użycie metody bezpośrednio -->
+                    @item.CreatedAt.ToShortDateString()
                 </td>
                 <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                    @Html.ActionLink("Details", "WorkTaskDetails", new { id = item.Id }) |
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                    @Html.ActionLink("Edytuj", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Szczegóły", "WorkTaskDetails", new { id = item.Id }) |
+                    @Html.ActionLink("Usuń", "Delete", new { id = item.Id })
                 </td>
             </tr>
         }
