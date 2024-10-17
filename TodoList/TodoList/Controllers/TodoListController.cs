@@ -2,41 +2,38 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoList.Entities;
+using TodoList.Services.Interfaces;
 
 namespace TodoList.Controllers
 {
     public class TodoListController : Controller
     {
-        private readonly WorkTaskDBContext _dbContext;
-        public TodoListController(WorkTaskDBContext dbContext)
+        private readonly IWorkTaskService _workTaskService;
+
+        public TodoListController(IWorkTaskService workTaskService)
         {
-            _dbContext = dbContext;
+            _workTaskService = workTaskService;
         }
         public async Task<ActionResult> Index()
         {
-            var workTasks = await _dbContext.WorkTasks.Where(wt=>wt.IsCompleted == false).ToListAsync();
+            var workTasks = await _workTaskService.GetIncompleteTasksAsync();
             return View(workTasks);
         }
         public async Task<ActionResult> WorkTaskDetails(int id)
         {
-            var workTask = await _dbContext.WorkTasks.FirstOrDefaultAsync(WT => WT.Id == id);
+            var workTask = await _workTaskService.GetTaskByIdAsync(id);
             return View(workTask);
         }
         [HttpGet]
         public async Task<ActionResult> FindWorkTasksByDate(DateTime date)
         {
-            var workTasks = await _dbContext.WorkTasks
-                .Where(wt => wt.ExpectedEndDate.Date == date.Date) 
-                .ToListAsync();
+            var workTasks = await _workTaskService.GetTasksByDateAsync(date);
             return View("Index", workTasks);
         }
         public async Task<PartialViewResult> GetNotifications()
         {
             var today = DateTime.Today;
-            var tasksForToday = await _dbContext.WorkTasks
-                .Where(wt => wt.ExpectedEndDate.Date == today)
-                .ToListAsync();
-
+            var tasksForToday = await _workTaskService.GetTasksByDateAsync(today);
             return PartialView("_NotificationPartial", tasksForToday);
         }
         public ActionResult Create()
@@ -48,22 +45,18 @@ namespace TodoList.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(WorkTask workTask)
         {
-            var workTaskToAdd = new WorkTask();
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                workTaskToAdd.Title = workTask.Title;
-                workTaskToAdd.Description = workTask.Description;
-                workTaskToAdd.ExpectedEndDate = workTask.ExpectedEndDate;
-                workTaskToAdd.CreatedAt = DateTime.Now;
-                await _dbContext.AddAsync(workTaskToAdd);
-                await _dbContext.SaveChangesAsync();
+                workTask.CreatedAt = DateTime.Now; // Ustawienie daty utworzenia w serwisie
+                await _workTaskService.CreateWorkTaskAsync(workTask);
+                return RedirectToAction("Index");
             }
-            return RedirectToAction("Index");
+            return View(workTask);
         }
 
         public async Task<ActionResult> Edit(int id)
         {
-            var workTask = await _dbContext.WorkTasks.FirstOrDefaultAsync(wt => wt.Id == id);
+            var workTask = await _workTaskService.GetTaskByIdAsync(id);
             return View(workTask);
         }
 
@@ -71,23 +64,18 @@ namespace TodoList.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit (WorkTask workTask)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                workTask.CreatedAt = DateTime.Now;
-                _dbContext.Update(workTask);
-                await _dbContext.SaveChangesAsync();
-
-            }
-            else
-            {
+                workTask.CreatedAt = DateTime.Now; // Ustawienie daty utworzenia w serwisie
+                await _workTaskService.UpdateWorkTaskAsync(workTask);
                 return RedirectToAction("Index");
             }
-            return RedirectToAction("Index");
+            return View(workTask);
         }
 
         public async Task<ActionResult> Delete(int id)
         {
-            var workTask = await _dbContext.WorkTasks.FirstOrDefaultAsync(wt => wt.Id == id);
+            var workTask = await _workTaskService.GetTaskByIdAsync(id);
             return View(workTask);
         }
 
@@ -95,8 +83,7 @@ namespace TodoList.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(WorkTask workTask)
         {
-            _dbContext.Remove(workTask);
-            await _dbContext.SaveChangesAsync();
+            await _workTaskService.DeleteWorkTaskAsync(workTask);
             return RedirectToAction("Index");
         }
     }
